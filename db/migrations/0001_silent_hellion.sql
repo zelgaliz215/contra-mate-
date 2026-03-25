@@ -1,0 +1,2 @@
+CREATE UNIQUE INDEX `funcionarios_numero_identificacion_unique` ON `funcionarios` (`numero_identificacion`);--> statement-breakpoint
+CREATE UNIQUE INDEX `tipos_proceso_nombre_unique` ON `tipos_proceso` (`nombre`);

@@ -1,7 +1,9 @@
 # ContratoMate — Plan de Implementación Gradual
+
 ## Documento para Agente IA (Claude Code)
 
 > **INSTRUCCIONES CRÍTICAS PARA EL AGENTE:**
+>
 > 1. Lee este documento **completo** antes de escribir una sola línea de código.
 > 2. Lee también el archivo `agent.md` del proyecto — contiene convenciones,
 >    ejemplos de código y reglas que tienen prioridad sobre cualquier preferencia
@@ -19,11 +21,13 @@ El proyecto **ya existe** en disco con Next.js 16, App Router, TypeScript y
 Tailwind configurados. El `agent.md` del proyecto define las convenciones base.
 
 **Lo que ya existe:**
+
 - Proyecto Next.js inicializado
 - `agent.md` con convenciones del proyecto
 - `db/schema.ts` con el schema completo de Drizzle (26 tablas, no modificar)
 
 **Lo que falta y debes implementar en este documento:**
+
 - Dependencias adicionales (Drizzle, shadcn, Zod, sonner)
 - Configuración de Drizzle + SQLite
 - Layout principal con sidebar
@@ -35,40 +39,43 @@ Tailwind configurados. El `agent.md` del proyecto define las convenciones base.
 ## Convenciones del Proyecto (del agent.md)
 
 ### Imports — orden obligatorio
+
 ```typescript
 // 1. React/Next
-import { useState } from 'react'
+import { useState } from "react";
 // 2. Drizzle
-import { db } from '@/db'
-import { instituciones } from '@/db/schema'
+import { db } from "@/db";
+import { instituciones } from "@/db/schema";
 // 3. Utils
-import { formatCOP } from '@/lib/utils'
+import { formatCOP } from "@/lib/utils";
 // 4. Componentes UI (Shadcn)
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 // 5. Componentes del módulo
-import InstitucionForm from '@/components/configuracion/InstitucionForm'
+import InstitucionForm from "@/components/configuracion/InstitucionForm";
 // 6. Tipos
-import type { Institucion } from '@/db/schema'
+import type { Institucion } from "@/db/schema";
 // 7. Server Actions
-import { upsertInstitucion } from '@/actions/instituciones'
+import { upsertInstitucion } from "@/actions/instituciones";
 ```
 
 ### Paths — usar siempre `@/`
+
 ```typescript
 // ✅ CORRECTO
-import { db } from '@/db'
-import { formatCOP } from '@/lib/utils'
+import { db } from "@/db";
+import { formatCOP } from "@/lib/utils";
 
 // ❌ INCORRECTO
-import { db } from '@/src/db'          // No existe carpeta src/
-import { db } from '../../db'          // Sin alias
+import { db } from "@/src/db"; // No existe carpeta src/
+import { db } from "../../db"; // Sin alias
 ```
 
 ### Server Actions — estructura estándar
+
 ```typescript
-'use server'
-import { db } from '@/db'
-import { revalidatePath } from 'next/cache'
+"use server";
+import { db } from "@/db";
+import { revalidatePath } from "next/cache";
 
 export async function createRecord(data: FormData) {
   // validar → insertar → revalidar → retornar resultado
@@ -76,6 +83,7 @@ export async function createRecord(data: FormData) {
 ```
 
 ### Server Components (pages) — patrón estándar
+
 ```typescript
 // app/(dashboard)/configuracion/page.tsx
 import { db } from '@/db'
@@ -97,7 +105,7 @@ export default async function ConfiguracionPage() {
 ```typescript
 export type ActionResult<T = void> =
   | { success: true; data: T; message: string }
-  | { success: false; error: string; fieldErrors?: Record<string, string[]> }
+  | { success: false; error: string; fieldErrors?: Record<string, string[]> };
 ```
 
 ---
@@ -137,30 +145,31 @@ pnpm add lucide-react
 Crear `drizzle.config.ts` en la raíz del proyecto:
 
 ```typescript
-import type { Config } from 'drizzle-kit'
+import type { Config } from "drizzle-kit";
 
 export default {
-  schema: './db/schema.ts',
-  out: './db/migrations',
-  dialect: 'sqlite',
+  schema: "./db/schema.ts",
+  out: "./db/migrations",
+  dialect: "sqlite",
   dbCredentials: {
-    url: './contratomate.db',
+    url: "./contratomate.db",
   },
-} satisfies Config
+} satisfies Config;
 ```
 
 Crear `db/index.ts`:
 
 ```typescript
-import Database from 'better-sqlite3'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import * as schema from './schema'
+import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import * as schema from "./schema";
 
-const sqlite = new Database('contratomate.db')
-export const db = drizzle(sqlite, { schema })
+const sqlite = new Database("contratomate.db");
+export const db = drizzle(sqlite, { schema });
 ```
 
 Agregar scripts en `package.json`:
+
 ```json
 {
   "scripts": {
@@ -173,6 +182,7 @@ Agregar scripts en `package.json`:
 ```
 
 Ejecutar migraciones:
+
 ```bash
 pnpm db:generate
 pnpm db:migrate
@@ -185,6 +195,7 @@ pnpm dlx shadcn@latest init
 ```
 
 Configuración del wizard:
+
 - Style: **Default**
 - Base color: **Slate**
 - CSS variables: **Yes**
@@ -203,7 +214,9 @@ pnpm dlx shadcn@latest add command
 ## 0.4 — Archivos de utilidades base
 
 ### `types/index.ts`
+
 Crear con:
+
 - Tipo `ActionResult<T>` según especificación anterior
 - Re-exportar todos los tipos inferidos del schema:
   ```typescript
@@ -211,85 +224,92 @@ Crear con:
   ```
 
 ### `lib/utils.ts`
+
 Crear con:
+
 - Función `cn()` usando `clsx` + `tailwind-merge` (patrón shadcn estándar)
 
 ### `lib/format.ts`
+
 Crear con estas funciones — **implementar todas**:
 
 ```typescript
 // Formatea número como moneda colombiana: $ 7.261.667,00
-export function formatCOP(valor: number): string
+export function formatCOP(valor: number): string;
 
 // Formatea fecha ISO a formato colombiano: 16/02/2026
-export function formatFecha(fecha: string): string
+export function formatFecha(fecha: string): string;
 
 // Formatea fecha ISO en texto largo: 16 de febrero de 2026
-export function formatFechaLarga(fecha: string): string
+export function formatFechaLarga(fecha: string): string;
 
 // Convierte número a texto en español para documentos
 // Ejemplo: 7261667 → "SIETE MILLONES DOSCIENTOS SESENTA Y UN MIL..."
 // Importante: usado en documentos Word, debe ser preciso
-export function numeroALetras(valor: number): string
+export function numeroALetras(valor: number): string;
 ```
 
 ### `lib/constants.ts`
+
 Crear con estos objetos — **incluir labels en español para la UI**:
 
 ```typescript
 export const ROLES_FUNCIONARIO = [
-  { value: 'RECTOR', label: 'Rector' },
-  { value: 'PAGADOR', label: 'Pagador / Auxiliar Administrativo' },
-  { value: 'CONTADOR', label: 'Contador' },
-  { value: 'SUPERVISOR', label: 'Supervisor' },
-] as const
+  { value: "RECTOR", label: "Rector" },
+  { value: "PAGADOR", label: "Pagador / Auxiliar Administrativo" },
+  { value: "CONTADOR", label: "Contador" },
+  { value: "SUPERVISOR", label: "Supervisor" },
+] as const;
 
 export const ESTADOS_PROCESO = [
-  { value: 'BORRADOR', label: 'Borrador', color: 'gray' },
-  { value: 'ACTIVO', label: 'Activo', color: 'green' },
-  { value: 'SUSPENDIDO', label: 'Suspendido', color: 'yellow' },
-  { value: 'LIQUIDADO', label: 'Liquidado', color: 'blue' },
-  { value: 'ANULADO', label: 'Anulado', color: 'red' },
-] as const
+  { value: "BORRADOR", label: "Borrador", color: "gray" },
+  { value: "ACTIVO", label: "Activo", color: "green" },
+  { value: "SUSPENDIDO", label: "Suspendido", color: "yellow" },
+  { value: "LIQUIDADO", label: "Liquidado", color: "blue" },
+  { value: "ANULADO", label: "Anulado", color: "red" },
+] as const;
 
 export const TIPOS_IDENTIFICACION = [
-  { value: 'CC', label: 'Cédula de Ciudadanía' },
-  { value: 'NIT', label: 'NIT' },
-  { value: 'CE', label: 'Cédula de Extranjería' },
-  { value: 'PASAPORTE', label: 'Pasaporte' },
-] as const
+  { value: "CC", label: "Cédula de Ciudadanía" },
+  { value: "NIT", label: "NIT" },
+  { value: "CE", label: "Cédula de Extranjería" },
+  { value: "PASAPORTE", label: "Pasaporte" },
+] as const;
 
 export const TIPOS_PERSONA = [
-  { value: 'NATURAL', label: 'Persona Natural' },
-  { value: 'JURIDICA', label: 'Persona Jurídica' },
-] as const
+  { value: "NATURAL", label: "Persona Natural" },
+  { value: "JURIDICA", label: "Persona Jurídica" },
+] as const;
 
 export const REGIMENES_IVA = [
-  { value: 'RESPONSABLE_IVA', label: 'Responsable de IVA' },
-  { value: 'NO_RESPONSABLE_IVA', label: 'No Responsable de IVA' },
-] as const
+  { value: "RESPONSABLE_IVA", label: "Responsable de IVA" },
+  { value: "NO_RESPONSABLE_IVA", label: "No Responsable de IVA" },
+] as const;
 
 export const CATEGORIAS_DOCUMENTO = [
-  { value: 'PRECONTRACTUAL', label: 'Precontractual' },
-  { value: 'CONTRACTUAL', label: 'Contractual' },
-  { value: 'EJECUCION', label: 'Ejecución' },
-  { value: 'LIQUIDACION', label: 'Liquidación' },
-] as const
+  { value: "PRECONTRACTUAL", label: "Precontractual" },
+  { value: "CONTRACTUAL", label: "Contractual" },
+  { value: "EJECUCION", label: "Ejecución" },
+  { value: "LIQUIDACION", label: "Liquidación" },
+] as const;
 ```
 
 ## 0.5 — Layout principal
 
 ### `app/layout.tsx`
+
 - Configurar fuente (Inter o Geist de next/font)
 - Añadir `<Toaster richColors position="top-right" />` de sonner
 - Envolver en el provider de tema si se configura dark mode
 
 ### `app/(dashboard)/layout.tsx`
+
 - Sidebar fijo a la izquierda (ancho: 240px)
 - Área de contenido principal con padding
 - Header superior con el título de la sección activa
 
 ### `components/layout/Sidebar.tsx`
+
 Sidebar de navegación con las siguientes secciones y rutas exactas:
 
 ```
@@ -310,17 +330,21 @@ Sidebar de navegación con las siguientes secciones y rutas exactas:
 ```
 
 Comportamiento del sidebar:
+
 - Resaltar ítem activo según `usePathname()`
 - Si no existe registro de institución en la DB, mostrar ícono de
   advertencia (⚠️) junto al ítem "Institución" en el sidebar
 - Logo "ContratoMate" en la parte superior con ícono de carpeta/documento
 
 ### `components/layout/Header.tsx`
+
 - Mostrar el título de la sección actual (derivado de la ruta)
 - Breadcrumb simple: `Inicio > Sección > Sub-sección`
 
 ### `app/(dashboard)/page.tsx`
+
 Dashboard con 4 tarjetas de estadísticas:
+
 1. **Procesos activos** — count de `procesos` con `estado = 'ACTIVO'`
 2. **CDPs disponibles** — count de CDPs sin RP asignado
 3. **Expedientes incompletos** — count de expedientes con `completitud < 100`
@@ -351,13 +375,14 @@ Antes de continuar al siguiente checkpoint, verificar:
 # CHECKPOINT 1 — Módulo Configuración: Institución
 
 > **Objetivo**: CRUD de la institución educativa. Es un registro único
->   (upsert, no create/list).
+> (upsert, no create/list).
 > **Prerequisito**: Checkpoint 0 completado y verificado.
 
 ## Contexto de negocio
 
 La institución es **un único registro** en el sistema. No se crea desde
 un formulario de "nuevo", sino que se configura. La pantalla debe:
+
 - Si no existe el registro: mostrar formulario vacío con título "Configurar institución"
 - Si ya existe: mostrar el formulario con los datos actuales para editar
 
@@ -408,6 +433,7 @@ email:
 Crear `actions/instituciones.ts`:
 
 ### `getInstitucion()`
+
 ```
 - Consulta: db.query.instituciones.findFirst()
 - Retorna: Institucion | null
@@ -415,6 +441,7 @@ Crear `actions/instituciones.ts`:
 ```
 
 ### `upsertInstitucion(data: InstitucionFormData)`
+
 ```
 - Validar con schema Zod, retornar fieldErrors si falla
 - Si existe registro (id conocido): hacer UPDATE
@@ -427,16 +454,19 @@ Crear `actions/instituciones.ts`:
 ## 1.3 — Componentes
 
 ### `components/configuracion/InstitucionForm.tsx`
+
 **Tipo**: Client Component (`'use client'`)
 
 **Props**:
+
 ```typescript
 interface InstitucionFormProps {
-  institucion: Institucion | null
+  institucion: Institucion | null;
 }
 ```
 
 **Campos del formulario** — en este orden visual:
+
 1. `nombre` — Input, label "Nombre completo de la institución", placeholder "Institución Educativa..."
 2. `siglas` — Input, label "Siglas", placeholder "IEDNDJ", máximo 20 chars con contador
 3. `nit` — Input, label "NIT", placeholder "823001921-9"
@@ -449,6 +479,7 @@ interface InstitucionFormProps {
 en pares: siglas+nit, municipio+departamento, telefono+email.
 
 **Comportamiento**:
+
 - Usar `react-hook-form` con `zodResolver`
 - Precargar valores si `institucion !== null`
 - Botón "Guardar configuración" con estado de carga
@@ -459,18 +490,20 @@ en pares: siglas+nit, municipio+departamento, telefono+email.
 ## 1.4 — Página
 
 ### `app/(dashboard)/configuracion/page.tsx`
+
 **Tipo**: Server Component
 
 ```typescript
 // Pseudocódigo de lo que debe hacer:
-const institucion = await getInstitucion()
+const institucion = await getInstitucion();
 // Renderizar header con título
 // Renderizar InstitucionForm pasando los datos
 ```
 
 Metadatos de la página:
+
 ```typescript
-export const metadata = { title: 'Configuración — ContratoMate' }
+export const metadata = { title: "Configuración — ContratoMate" };
 ```
 
 ---
@@ -551,6 +584,7 @@ activo:
 Crear `actions/funcionarios.ts`:
 
 ### `getFuncionarios()`
+
 ```
 - Consulta todos los funcionarios ordenados por rol, luego por nombre
 - Incluye el campo activo para distinguir estados
@@ -558,6 +592,7 @@ Crear `actions/funcionarios.ts`:
 ```
 
 ### `getFuncionarioActivoPorRol(rol: string)`
+
 ```
 - Busca el funcionario activo de un rol específico
 - Retorna: Funcionario | null
@@ -565,6 +600,7 @@ Crear `actions/funcionarios.ts`:
 ```
 
 ### `createFuncionario(data)`
+
 ```
 - Validar con schema Zod
 - Si data.activo === true:
@@ -577,6 +613,7 @@ Crear `actions/funcionarios.ts`:
 ```
 
 ### `updateFuncionario(id: number, data)`
+
 ```
 - Validar con schema Zod
 - Si data.activo === true:
@@ -589,6 +626,7 @@ Crear `actions/funcionarios.ts`:
 ```
 
 ### `toggleFuncionarioActivo(id: number)`
+
 ```
 - Obtener el funcionario actual
 - Si se va a ACTIVAR (activo: false → true):
@@ -603,6 +641,7 @@ Crear `actions/funcionarios.ts`:
 ## 2.3 — Componentes
 
 ### `components/configuracion/FuncionariosTable.tsx`
+
 **Tipo**: Client Component (necesita estado para el modal)
 
 **Columnas de la tabla**:
@@ -616,12 +655,14 @@ Crear `actions/funcionarios.ts`:
 | Acciones | Botones Editar, Activar/Desactivar |
 
 **Colores de badge por rol**:
+
 - RECTOR → `blue`
 - PAGADOR → `green`
 - CONTADOR → `orange`
 - SUPERVISOR → `purple`
 
 **Comportamiento**:
+
 - Agrupar visualmente por rol (o al menos ordenar por rol)
 - Botón "Agregar funcionario" en el header que abre el modal
 - El modal de creación/edición usa `FuncionarioFormDialog`
@@ -631,21 +672,24 @@ Crear `actions/funcionarios.ts`:
   ("¿Desactivar a [nombre actual] y activar a [nombre nuevo]?")
 
 ### `components/configuracion/FuncionarioFormDialog.tsx`
+
 **Tipo**: Client Component
 
 **Props**:
+
 ```typescript
 interface FuncionarioFormDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  funcionario?: Funcionario  // undefined = modo crear
-  institucionId: number
-  funcionariosActivos: Record<string, Funcionario>
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  funcionario?: Funcionario; // undefined = modo crear
+  institucionId: number;
+  funcionariosActivos: Record<string, Funcionario>;
   // Record de rol → funcionario activo actual para mostrar advertencia
 }
 ```
 
 **Campos del formulario en el Dialog**:
+
 1. Selector de Rol (Select con los 4 opciones)
 2. Nombre completo (Input)
 3. Tipo de identificación (Select: CC, CE)
@@ -655,6 +699,7 @@ interface FuncionarioFormDialogProps {
 
 **Advertencia condicional**: Si el rol seleccionado ya tiene un funcionario
 activo, mostrar un bloque de alerta amarillo debajo del selector de rol:
+
 ```
 ⚠️ Ya existe un RECTOR activo: "Jaider Andres Suarez Vergara"
    Al guardar este funcionario como activo, el anterior será desactivado.
@@ -665,16 +710,17 @@ activo, mostrar un bloque de alerta amarillo debajo del selector de rol:
 ## 2.4 — Página
 
 ### `app/(dashboard)/funcionarios/page.tsx`
+
 **Tipo**: Server Component
 
 ```typescript
 // Lo que debe hacer:
-const institucion = await getInstitucion()
+const institucion = await getInstitucion();
 // Si no hay institución, mostrar mensaje de alerta:
 // "Primero debes configurar los datos de la institución"
 // con botón que lleva a /configuracion
 
-const funcionarios = await getFuncionarios()
+const funcionarios = await getFuncionarios();
 // Calcular el mapa de funcionarios activos por rol
 // Renderizar FuncionariosTable pasando los datos
 ```
@@ -751,6 +797,7 @@ El seed debe usar `onConflictDoNothing()` para ser idempotente.
 
 Los catálogos son listas de valores que otras entidades usan como referencia.
 Se configuran al inicio. Todos comparten el mismo comportamiento:
+
 - Se pueden crear, editar, activar/desactivar
 - **No se eliminan si están en uso** (mostrar error específico)
 - Solo los **activos** aparecen en los selectores de otros formularios
@@ -801,6 +848,7 @@ Para **cada uno de los 5 catálogos** implementar las siguientes funciones.
 Reemplazar `[Catalogo]` con el nombre específico:
 
 ### `get[Catalogo]s()`
+
 ```
 Retorna todos los registros (activos e inactivos)
 Ordenados por nombre
@@ -808,6 +856,7 @@ Usado en la página de gestión
 ```
 
 ### `get[Catalogo]sActivos()`
+
 ```
 Retorna solo los registros con activo=true
 Ordenados por nombre
@@ -815,6 +864,7 @@ Usado en selectores de otros formularios (CDPs, etc.)
 ```
 
 ### `create[Catalogo](data)`
+
 ```
 Validar con schema Zod → retornar fieldErrors si falla
 Verificar unicidad del código/nombre (según el catálogo):
@@ -831,6 +881,7 @@ Mensaje éxito: "Creado correctamente"
 ```
 
 ### `update[Catalogo](id: number, data)`
+
 ```
 Validar con schema Zod
 Verificar unicidad excluyendo el registro actual (WHERE id != id)
@@ -841,6 +892,7 @@ Mensaje éxito: "Actualizado correctamente"
 ```
 
 ### `toggle[Catalogo]Activo(id: number)`
+
 ```
 Obtener registro actual
 Cambiar activo al valor contrario
@@ -849,6 +901,7 @@ Retorna: ActionResult<void>
 ```
 
 ### `delete[Catalogo](id: number)`
+
 ```
 Verificar si está en uso (hacer COUNT de las tablas que lo referencian):
   - Fuentes: verificar en cdp_rubros y rp_rubros
@@ -868,24 +921,27 @@ Retorna: ActionResult<void>
 ## 3.3 — Componentes
 
 ### `components/catalogos/CatalogoTable.tsx`
+
 Componente **genérico reutilizable** para los 5 catálogos.
 
 **Props**:
+
 ```typescript
 interface CatalogoTableProps<T extends { id: number; activo: boolean }> {
-  datos: T[]
+  datos: T[];
   columnas: {
-    key: keyof T
-    label: string
-    render?: (valor: any, fila: T) => React.ReactNode
-  }[]
-  onEditar: (item: T) => void
-  onToggleActivo: (id: number) => void
-  onEliminar: (id: number) => void
+    key: keyof T;
+    label: string;
+    render?: (valor: any, fila: T) => React.ReactNode;
+  }[];
+  onEditar: (item: T) => void;
+  onToggleActivo: (id: number) => void;
+  onEliminar: (id: number) => void;
 }
 ```
 
 Renderiza:
+
 - Tabla con las columnas definidas + columna "Estado" + columna "Acciones"
 - Badge verde "Activo" / gris "Inactivo" en columna Estado
 - Botones en columna Acciones: Editar (lápiz), Activar/Desactivar (ojo), Eliminar (basura)
@@ -895,24 +951,30 @@ Renderiza:
 ### Formularios individuales (en Dialog):
 
 **`FuenteFormDialog.tsx`**:
+
 - Campos: `codigo` (opcional) + `nombre` (requerido)
 - Layout: los dos campos en una columna
 
 **`RubroFormDialog.tsx`**:
+
 - Campos: `codigo` + `descripcion`
 - Ayuda bajo el campo código: "Formato: 2.1.02.02.008.06"
 
 **`TipoProcesoFormDialog.tsx`**:
+
 - Campos: `nombre` + `naturaleza` (opcional)
 
 **`CodigoUnspscFormDialog.tsx`**:
+
 - Campos: `codigo` + `descripcion`
 - Ayuda bajo el campo código: "Solo dígitos, ej: 72102700"
 
 **`TipoDocumentoFormDialog.tsx`**:
+
 - Campos: `nombre` + `categoria` (Select) + `descripcion` (Textarea, opcional)
 
 Todos los formularios:
+
 - Usan `react-hook-form` + `zodResolver`
 - Precargran datos en modo edición
 - Botones "Cancelar" y "Guardar" con loading state
@@ -921,9 +983,11 @@ Todos los formularios:
 ## 3.4 — Página
 
 ### `app/(dashboard)/catalogos/page.tsx`
+
 **Tipo**: Server Component híbrido (carga datos, renderiza Client Component wrapper)
 
 Usar `Tabs` de shadcn con estas 5 pestañas en este orden:
+
 1. **Fuentes** — para catálogo de fuentes de financiamiento
 2. **Rubros** — para rubros presupuestales
 3. **Tipos de Proceso** — para tipos de contrato
@@ -931,6 +995,7 @@ Usar `Tabs` de shadcn con estas 5 pestañas en este orden:
 5. **Tipos de Documento** — para tipos de documentos del sistema
 
 Cada pestaña tiene:
+
 - Header con título descriptivo + botón "Agregar [nombre]"
 - Tabla del catálogo con sus datos
 - El formulario de creación/edición en un Dialog
@@ -993,11 +1058,12 @@ Tipos de Documento (con su categoría):
 Todos usando `onConflictDoNothing()`.
 
 Actualizar la función principal `seed()` para llamar en orden:
+
 ```typescript
 async function seed() {
-  await seedConfiguracion()  // del checkpoint 2
-  await seedCatalogos()      // nuevo
-  console.log('✅ Seed completado')
+  await seedConfiguracion(); // del checkpoint 2
+  await seedCatalogos(); // nuevo
+  console.log("✅ Seed completado");
 }
 ```
 
