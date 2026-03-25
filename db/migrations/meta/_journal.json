@@ -15,6 +15,13 @@
       "when": 1774449631566,
       "tag": "0001_busy_romulus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1774454190609,
+      "tag": "0002_mighty_vargas",
+      "breakpoints": true
     }
   ]
 }
